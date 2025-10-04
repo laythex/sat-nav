@@ -19,32 +19,34 @@ tf = ti + 5400
 grace_distances = np.loadtxt('GPS1B_2023-03-23_C_04.txt', dtype=np.float64,
                              skiprows=196, usecols=[0, 3, 7])
 # Берем необходимый промежуток времени и только первый спутник
-entries_to_remove = np.where((grace_distances[:, 0] < ti) | (grace_distances[:, 0] >= tf) |
-                             (grace_distances[:, 1] != gps_id))[0]
-grace_distances = np.delete(grace_distances, entries_to_remove, axis=0)
+filtered_entries = np.where((grace_distances[:, 0] >= ti) | (grace_distances[:, 0] < tf) |
+                            (grace_distances[:, 1] == gps_id))[0]
+grace_distances = grace_distances[filtered_entries]
 
 # Считываем положения GRACE
 # Время    Координата X    Координата Y    Координата Z
 grace_locations = np.loadtxt('GNV1B_2023-03-23_C_04.txt', dtype=np.float64,
                              skiprows=196, usecols=[0, 3, 4, 5])
 # Берем необходимый промежуток времени
-entries_to_remove = np.where((grace_distances[:, 0] < ti) | (grace_distances[:, 0] >= tf))[0]
-grace_locations = np.delete(grace_locations, entries_to_remove, axis=0)
-
-_, filtered_entries, _ = np.intersect1d(grace_locations[:, 0], grace_distances[:, 0], return_indices=True)
+filtered_entries = np.where((grace_distances[:, 0] >= ti) | (grace_distances[:, 0] < tf))[0]
 grace_locations = grace_locations[filtered_entries]
-print(filtered_entries)
-print(grace_locations.shape)
-print(grace_distances.shape)
 
-# Более красиво выкинуть лишнее и соединить в общую таблицу
+# Объединяем данные Grace в одну таблицу
 
-# Интерполируем положение GPS
-product = sp3.Product.from_file("ESA0OPSFIN_20230820000_01D_05M_ORB.SP3")
-satellite = product.satellite_with_id(sp3_id.encode())
-gps_poly = sp3.narrowed_records_to_piecewise_polynomial(records=satellite.records, window=5, degree=10)
-
-errors = []
+# _, filtered_entries, _ = np.intersect1d(grace_locations[:, 0], grace_distances[:, 0], return_indices=True)
+# grace_locations = grace_locations[filtered_entries]
+# print(filtered_entries)
+# print(grace_locations.shape)
+# print(grace_distances.shape)
+#
+# # Более красиво выкинуть лишнее и соединить в общую таблицу
+#
+# # Интерполируем положение GPS
+# product = sp3.Product.from_file("ESA0OPSFIN_20230820000_01D_05M_ORB.SP3")
+# satellite = product.satellite_with_id(sp3_id.encode())
+# gps_poly = sp3.narrowed_records_to_piecewise_polynomial(records=satellite.records, window=5, degree=10)
+#
+# errors = []
 
 # # Проходим по всем точкам телеметрии GRACE
 # for entry_distances in grace_distances:

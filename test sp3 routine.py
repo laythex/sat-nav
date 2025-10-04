@@ -8,9 +8,11 @@ product = sp3.Product.from_file("ESA0OPSFIN_20230820000_01D_05M_ORB.SP3")
 satellite = product.satellite_with_id(b"G07")
 poly = sp3.narrowed_records_to_piecewise_polynomial(records=satellite.records, window=5, degree=10)
 
-# base+grace_time
+# base + grace_time
 c = 1363568400
 t = Time(c, format='gps', scale='utc')
 itrs = poly(t)
+
+print(itrs)
 
 print(itrs.cartesian)
